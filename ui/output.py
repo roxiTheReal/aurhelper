@@ -1,3 +1,6 @@
+import random
+
+from common.config import is_kibty_enabled
 from common.types import PackageInfo, PacmanInfo
 
 
@@ -12,6 +15,44 @@ class Colors:
     YELLOW = "\033[33m"
 
 
+emoticons = {
+    "error": [
+        '><"',
+        "3:",
+        "o.o'",
+        '^^"',
+        '-.-"',
+        "qwq",
+    ],
+    "warn": [
+        "owo?",
+        ">w>",
+        "<w<",
+    ],
+    "info": [
+        ":3",
+        "^w^",
+        "-w-",
+    ],
+    "success": [
+        ":3",
+        ">w<",
+        "x3",
+    ],
+    "ask": [
+        ":3c",
+        "owo?",
+        "-w-?",
+    ],
+}
+
+
+def get_emoticon(kind: str) -> str:
+    if not is_kibty_enabled():
+        return ""
+    return " " + random.choice(emoticons[kind])
+
+
 def print_err(err: str, *args) -> None:
     """
     Internal helper to print a properly formatted error message.
@@ -19,7 +60,8 @@ def print_err(err: str, *args) -> None:
     @param args: Optional arguments to include in the output.
     """
     c = Colors
-    output = f"{c.RED}[ERROR] {c.RESET}:: {err}"
+    emoticon = get_emoticon("error")
+    output = f"{c.RED}[ERROR]{emoticon}{c.RESET} :: {err}"
     if args:
         output += f": {args[0]}"
     print(output)
@@ -32,7 +74,8 @@ def print_warn(warn: str, *args) -> None:
     @param args: Optional arguments to include in the output.
     """
     c = Colors
-    output = f"{c.YELLOW}[WARN] {c.RESET}:: {warn}"
+    emoticon = get_emoticon("warn")
+    output = f"{c.YELLOW}[WARN]{emoticon}{c.RESET} :: {warn}"
     if args:
         output += f": {args[0]}"
     print(output)
@@ -45,7 +88,8 @@ def print_info(info: str, *args) -> None:
     @param args: Optional arguments to include in the output.
     """
     c = Colors
-    output = f"{c.BLUE}==> {c.RESET}{c.BOLD}{info}{c.RESET}"
+    emoticon = get_emoticon("info")
+    output = f"{c.BLUE}[INFO]{emoticon}{c.RESET} :: {c.BOLD}{info}{c.RESET}"
     if args:
         output += f": {args[0]}"
     print(output)
@@ -58,11 +102,12 @@ def print_ask(ask: str, default_yes: bool = True) -> None:
     @param default_yes: Whether the default answer is yes or no.
     """
     c = Colors
+    emoticon = get_emoticon("ask")
     if default_yes:
         indicator = f"[{c.GREEN}Y{c.RESET}/{c.RED}n{c.RESET}]"
     else:
         indicator = f"[{c.GREEN}y{c.RESET}/{c.RED}N{c.RESET}]"
-    print(f"{c.BLUE}[?] {c.RESET}:: {ask} {indicator} ", end="")
+    print(f"{c.BLUE}[?]{emoticon}{c.RESET} :: {ask} {indicator} ", end="")
 
 
 def print_success(scs: str, *args) -> None:
@@ -72,7 +117,8 @@ def print_success(scs: str, *args) -> None:
     @param args: Optional arguments to include in the output.
     """
     c = Colors
-    output = f"{c.GREEN}[SUCC] {c.RESET}:: {scs}"
+    emoticon = get_emoticon("success")
+    output = f"{c.GREEN}[SUCC]{emoticon}{c.RESET} :: {scs}"
     if args:
         output += f": {args[0]}"
     print(output)
@@ -122,4 +168,35 @@ def print_pacman_summary(pkg: PacmanInfo) -> None:
             f"{c.CYAN}{c.BOLD}optional dependencies ({len(opt_depends)}){c.RESET}: {opt_deps}"
         )
 
+    print_ask("proceed with installation?")
+
+
+def print_combined_summary(
+    pacman_pkgs: list[str],
+    aur_pkgs: list[str],
+    depends: list[str],
+    opt_depends: list[str],
+    make_depends: list[str],
+) -> None:
+    c = Colors
+    if pacman_pkgs:
+        print(
+            f"{c.CYAN}{c.BOLD}sync explicit ({len(pacman_pkgs)}){c.RESET}: {', '.join(pacman_pkgs)}"
+        )
+    if aur_pkgs:
+        print(
+            f"{c.CYAN}{c.BOLD}aur explicit ({len(aur_pkgs)}){c.RESET}: {', '.join(aur_pkgs)}"
+        )
+    if depends:
+        print(
+            f"{c.CYAN}{c.BOLD}dependencies ({len(depends)}){c.RESET}: {', '.join(depends)}"
+        )
+    if opt_depends:
+        print(
+            f"{c.CYAN}{c.BOLD}optional dependencies ({len(opt_depends)}){c.RESET}: {', '.join(opt_depends)}"
+        )
+    if make_depends:
+        print(
+            f"{c.CYAN}{c.BOLD}make dependencies ({len(make_depends)}){c.RESET}: {', '.join(make_depends)}"
+        )
     print_ask("proceed with installation?")

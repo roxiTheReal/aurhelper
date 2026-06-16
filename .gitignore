@@ -1,0 +1,12 @@
+*/__pycache__
+build/main
+
+*.spec
+
+dist
+
+main.build/
+main.dist/
+main.onefile-build/
+
+calico
