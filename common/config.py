@@ -11,10 +11,7 @@ DEFAULT_CONFIG = {"output": {"kibty": False}}
 
 
 def load_config() -> dict:
-    print(f"config path: {CONFIG_PATH}")
-    print(f"exists: {os.path.exists(CONFIG_PATH)}")
     if not os.path.exists(CONFIG_PATH):
-        print("creating config...")
         save_config(DEFAULT_CONFIG)
         return DEFAULT_CONFIG
 
